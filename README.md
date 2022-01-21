@@ -10,7 +10,9 @@ framework based on Stokes equation and a modified Poisson-Boltzmann equation. We
 
 ### Description
 
-We have included the notebooks, python scripts and CP2K input files to reproduce the main results of our paper.
+We have included the notebooks, python scripts and CP2K input files to reproduce the main results of the following paper:
+
+* L. Joly, R. H. Meißner, M. Iannuzzi, G. Tocci, *Osmotic Transport at the Aqueous Graphene and hBN Interfaces: Scaling Laws from a Unified, First-Principles Description* ACS Nano **15**, 9 15249-15258 (2021); DOI: [10.1021/acsnano.1c05931]
 
 ### Dependencies
 
