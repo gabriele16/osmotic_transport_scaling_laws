@@ -1,0 +1,331 @@
+@SET PROJECT  BNS
+@SET RESFILE  BNS
+@SET XYZ      ./mod_gra_wat_i.xyz
+@SET RESTART  0
+@SET PRECOND FULL_KINETIC 
+@SET THERM_REST  T
+@SET HESSIAN 0
+@SET WALLTIME 86400
+@SET CELL_A  26.082
+@SET CELL_B  25.097
+@SET CELL_C   50.0
+@SET RUNTYPE  MD
+@SET MD_NST   20
+@SET MD_DT   1.0
+@SET MD_T    300.
+@SET OT_MINI DIIS
+@SET EPSSCF   1.00E-06
+@SET LIBDIR   /users/gtocci/scratch_daint_3000/data_cp2k/
+#@SET MULTIPLICITY 4
+@SET GUESS RESTART
+
+
+
+&GLOBAL
+   PROJECT  ${PROJECT}
+   RUN_TYPE ${RUNTYPE}
+   WALLTIME ${WALLTIME}
+   PRINT_LEVEL LOW
+&END GLOBAL
+
+&FORCE_EVAL
+   METHOD QS
+#   STRESS_TENSOR ANALYTICAL
+   &DFT
+      BASIS_SET_FILE_NAME     ${LIBDIR}/BASIS_MOLOPT
+      POTENTIAL_FILE_NAME     ${LIBDIR}/GTH_POTENTIALS
+      WFN_RESTART_FILE_NAME   ./${RESFILE}-RESTART.wfn
+      # LSD
+      CHARGE +1
+      &QS
+         EXTRAPOLATION  ASPC
+         EXTRAPOLATION_ORDER     4
+         MAP_CONSISTENT
+      &END QS
+      &SCF
+         MAX_SCF    10
+         EPS_SCF    ${EPSSCF}
+         SCF_GUESS  ${GUESS}
+         &OT  T
+            MINIMIZER  ${OT_MINI}
+            @if ${PRECOND} == FULL_ALL
+               ENERGY_GAP 1E-4
+            @endif
+            PRECONDITIONER ${PRECOND}
+         &END OT
+         &OUTER_SCF
+            MAX_SCF    30
+            EPS_SCF    ${EPSSCF}
+         &END
+         &PRINT
+            &RESTART
+               &EACH
+                  QS_SCF 50
+               &END
+            ADD_LAST NUMERIC
+            &END
+         &END
+
+      &END SCF
+      &MGRID
+         CUTOFF 460
+         NGRIDS 5
+      &END
+      &XC
+
+      &XC_FUNCTIONAL
+        &LIBXC
+         FUNCTIONAL XC_GGA_X_OPTB88_VDW
+        &END LIBXC
+             &VWN
+             &END VWN
+      &END XC_FUNCTIONAL
+          &vdW_POTENTIAL
+              DISPERSION_FUNCTIONAL NON_LOCAL
+              &NON_LOCAL
+                CUTOFF 360
+                TYPE DRSLL
+                VERBOSE_OUTPUT
+                KERNEL_FILE_NAME ${LIBDIR}/vdW_kernel_table.dat
+              &END NON_LOCAL
+          &END vdW_POTENTIAL
+
+          &XC_GRID
+            XC_DERIV SPLINE2_SMOOTH
+          &END
+      &END XC
+  
+#      &POISSON
+#          POISSON_SOLVER MT
+#          PERIODIC XY
+#      &END
+   
+       &PRINT
+         &MULLIKEN
+         FILENAME =${PROJECT}.mulliken
+         &END
+
+#        &HIRSHFELD
+#          FILENAME =${PROJECT}.hirsch
+#          SELF_CONSISTENT T
+#          SHAPE_FUNCTION DENSITY
+#        &END
+
+#         &E_DENSITY_CUBE
+#         &END E_DENSITY_CUBE
+
+#         &MO_CUBES
+#            NLUMO 1
+#            NHOMO 1
+#            WRITE_CUBE .FALSE.
+#            &EACH
+#               MD 10
+#            &END
+#         &END
+
+#         &TOT_DENSITY_CUBE
+#         &END TOT_DENSITY_CUBE
+
+      &END PRINT
+
+
+   &END DFT
+
+   &SUBSYS
+      &CELL
+ABC       ${CELL_A}           ${CELL_B}          ${CELL_C}
+      &END CELL
+#      &TOPOLOGY
+#         CONNECTIVITY OFF
+#         COORD_FILE_NAME ${XYZ}
+#         COORDINATE      XYZ
+#         &CENTER_COORDINATES
+#         &END
+#       MULTIPLE_UNIT_CELL 1 1 1
+#      &END TOPOLOGY
+
+      &COLVAR
+       &DISTANCE
+         AXIS Z
+         POINTS 1 2
+         &POINT
+          ATOMS 1..240
+         &END
+         &POINT
+          ATOMS 1441
+         &END
+       &END
+      &END COLVAR
+
+
+      &KIND C
+       BASIS_SET DZVP-MOLOPT-SR-GTH-q4
+        POTENTIAL GTH-PBE-q4
+      &END KIND
+
+      &KIND I
+       BASIS_SET  DZVP-MOLOPT-SR-GTH
+        POTENTIAL GTH-PBE
+      &END KIND
+
+
+
+      &KIND N
+       BASIS_SET  DZVP-MOLOPT-SR-GTH-q5
+        POTENTIAL GTH-PBE-q5
+      &END KIND
+
+      &KIND B
+       BASIS_SET  DZVP-MOLOPT-SR-GTH-q3
+        POTENTIAL GTH-PBE-q3
+      &END KIND
+
+    &KIND Mo
+      ELEMENT   Mo
+      BASIS_SET DZVP-MOLOPT-SR-GTH
+      POTENTIAL GTH-PBE-q14
+    &END KIND
+    &KIND S  
+      ELEMENT   S
+      BASIS_SET DZVP-MOLOPT-SR-GTH
+      POTENTIAL GTH-PBE-q6
+    &END KIND
+
+      &KIND K
+       BASIS_SET  DZVP-MOLOPT-SR-GTH
+        POTENTIAL GTH-PBE
+      &END KIND
+
+    &KIND H
+      ELEMENT   H
+      MASS 2.0
+      BASIS_SET DZVP-MOLOPT-SR-GTH
+      POTENTIAL GTH-PBE-q1
+    &END KIND
+    &KIND O
+      ELEMENT   O
+      BASIS_SET DZVP-MOLOPT-SR-GTH
+      POTENTIAL GTH-PBE-q6
+    &END KIND
+
+   &END SUBSYS
+&END FORCE_EVAL
+
+&MOTION
+
+  &CONSTRAINT
+    &COLLECTIVE
+      COLVAR 1
+      INTERMOLECULAR
+      &RESTRAINT
+        K [kjmol*nm^-2] 418.4
+      &END
+    &END
+    &COLVAR_RESTART
+                  2.6678499604351227E+01
+    &END
+  &END CONSTRAINT
+
+  &FREE_ENERGY
+
+    &METADYN
+      DO_HILLS F
+      &METAVAR
+        COLVAR 1
+        SCALE 1.
+      &END
+      &PRINT
+        &COLVAR
+           COMMON_ITERATION_LEVELS 3
+           &EACH
+             MD 1
+           &END
+        &END
+      &END
+    &END METADYN
+  &END FREE_ENERGY
+
+    &MD
+      ENSEMBLE NVT
+STEPS 2000
+      TIMESTEP 1.0
+      TEMPERATURE 300
+      TEMP_KIND
+    &PRINT
+      &TEMP_KIND
+      &END
+    &END
+      &THERMOSTAT
+        TYPE NOSE
+        REGION GLOBAL
+   &NOSE
+      LENGTH 4
+      TIMECON 100.
+      MTS 2
+    &END NOSE
+      &END THERMOSTAT
+
+    &BAROSTAT
+      PRESSURE 1.
+      TIMECON [fs] 100.
+      VIRIAL Z
+    &END
+
+
+    &END MD
+
+    &PRINT
+      &FORCES
+       UNIT eV*angstrom^-1
+        &EACH
+          MD 1
+        &END
+      &END
+
+      &TRAJECTORY
+        &EACH
+          MD 1
+        &END
+      &END
+      &VELOCITIES
+        &EACH
+          MD 1
+        &END
+      &END
+
+      &RESTART
+        &EACH
+          MD 1
+        &END
+      &END
+      &RESTART_HISTORY
+        &EACH
+          MD 100
+        &END
+      &END
+    &END
+
+
+&END MOTION
+
+@if ${RESTART} == 1
+&EXT_RESTART
+  RESTART_FILE_NAME ${RESFILE}-1.restart
+   RESTART_DEFAULT T
+   RESTART_POS T
+   RESTART_VEL T
+   RESTART_CELL T
+   RESTART_THERMOSTAT ${THERM_REST}
+&END EXT_RESTART
+@endif
+
+@if ${RESTART} == 0
+&EXT_RESTART
+  RESTART_FILE_NAME initial_condition.restart
+   RESTART_DEFAULT F
+   RESTART_POS T
+&END EXT_RESTART
+@endif
+
+
+
