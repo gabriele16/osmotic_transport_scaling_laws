@@ -20,7 +20,7 @@ We have included the notebooks, python scripts and CP2K input files to reproduce
 
 ### Executing programs
 
-* In the directory ```calculate_free_energies``` execute ```./extract_free_energies.sh``` to get the free energy profiles from the collective variable (CV) files for each umbrella sampling simulation;
+* In the directory ``calculate_free_energies``` execute ```./extract_free_energies.sh``` to get the free energy profiles from the collective variable (CV) files for each umbrella sampling simulation;
 * Run the mathematica notebook ```solv_osm_mpb.nb``` to solve the mPB equation with the finite elements method (FEM) and to calculate the integrals of the osmotic transport coefficients numerically taking as input the water density profiles and the ions' free energy profiles;
-* Run the jupyter notebook ```osmotic_transport.ipynb``` to produce figures 2 and 3 in the main text by taking as input the data that has been pre-calculated from the previous two steps
+* Run the jupyter notebook ```osmotic_transport.ipynb``` to produce figures 2 and 3 in the main text by taking as input the data that has been pre-calculated from the previous two steps;
 
