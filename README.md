@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/397937474.svg)](https://zenodo.org/badge/latestdoi/397937474)
+
 # Osmotic transport at the aqueous graphene and hBN interfaces:  scaling laws from a unified, first principles description.
 
 Laurent Joly, Rober Meissner, Marcella Iannuzzi, Gabriele Tocci
